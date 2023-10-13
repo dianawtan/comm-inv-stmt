@@ -1,0 +1,290 @@
+---
+title: "An analysis of the 'community involvement statements' published in _Autism_"
+author: "Diana Tan"
+date: "2023-10-13"
+output:   
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(tidyverse)
+library(crosstable)
+```
+## __Preliminary analysis__  
+
+#### This report provides an overview of results generated from a preliminary analysis. This dataset includes information obtained from __283 journal articles__ (excluding Perspectives, Commentaries and Editorials; n = 16) published in _Autism_ in the year 2019 (two years before community involvement statements were made mandatory) or 2022 (two years after statements were made mandatory).
+
+
+```{r data import & processing, include = FALSE}
+fulldata <- read_excel("raw-data/comm-inv_interim-data_20231013.xlsx", sheet = "FINALISED")
+
+
+```
+<br>
+<br>
+
+##### __1) Frequency of reporting__
+
+Between 1 Jan 2019 and 31 Dec 2019, _Autism_ published __116 research papers__. __12 of which (10.3%)__ included information on community involvement activity. 
+Between 1 Jan 2022 and 31 Dec 2022, following the introduction of the mandatory reporting of community involvement policy in Jan 2021, _Autism_ published __167 research papers__. __90 of which (53.9%)__ included information on community involvement activity.
+
+*Observation: Proportion of studies reporting community involvement increased by over 5-fold over the two time points. In our systematic review, this increase was only two-fold (about 32 papers in 2019 and 66 papers in 2022). 
+
+```{r frequency analysis, include = TRUE}
+
+yearCommInv <- fulldata %>%
+  select("yearPub", "commInvPresence")
+
+pubCountTotal <- yearCommInv %>% 
+  group_by(yearPub) %>%
+  count()
+
+pubByCommInv <- yearCommInv %>% 
+  group_by(yearPub) %>%
+  filter(commInvPresence == "Yes") %>%
+  count()
+
+yearCommInv <- as.data.frame(table(yearCommInv))
+
+freqBarChart <- ggplot(yearCommInv, aes(x = fct_relevel(yearPub, c("2022", "2019")), y = Freq, fill = fct_relevel(commInvPresence, c("No", "Yes")))) +
+  geom_col() +
+  labs(x = "Year",
+       y = "Number of articles",
+       fill = "Presence of community involvement") +
+  scale_fill_brewer(palette = "Set2") +
+  theme(legend.position = "bottom") +
+  coord_flip()
+
+freqBarChart
+
+```
+
+<br>
+<br>
+
+##### __2) Type of community involvement report__  
+
+```{r level of participation, include = TRUE}
+
+partdata <- fulldata %>%
+  filter(commInvPresence == "Yes") %>%
+  select("levelOfPart", "yearPub")
+
+partdata <- as.data.frame(table(partdata))
+
+partBarChart <- ggplot(partdata, aes(fill = yearPub, x = fct_relevel(levelOfPart, c("Insufficient information", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")), y = Freq)) +
+  geom_col(position = "stack") +
+  labs(x = "Level of Participation",
+       y = "Number of articles",
+       fill = "Year") +
+  coord_flip()
+
+partBarChart
+
+```
+<br>
+<br>
+
+##### __3) Breadth of Community Involvement (OVERALL)__  
+
+```{r breadth overall, include = TRUE}
+
+breadthdata <- fulldata %>%
+  select(PMID, c("Developing community-based theories of the research":"Insufficient information"))
+
+#pivot wide to long
+
+breadthdatalong <- breadthdata %>%
+  pivot_longer(cols = c("Developing community-based theories of the research", 
+                        "Grant proposal writing", 
+                        "Background research", 
+                        "Designing study (added)", 
+                        "Choosing research methods", 
+                        "Developing sampling procedures", 
+                        "Recruiting study participants", 
+                        "Developing intervention", 
+                        "Implementing the intervention", 
+                        "Designing/Modifying interview and/or survey questions",
+                        "Providing inputs on public-facing materials", 
+                        "Collecting primary data", 
+                        "Analysing data", 
+                        "Interpreting study findings", 
+                        "Writing reports/journal articles", 
+                        "Giving presentations at meetings/conferences",
+                        "Disseminating findings (approach unspecified)",
+                        "Providing endorsement on project", 
+                        "All aspects of research", 
+                        "Insufficient information"),
+               names_to = "Breadth of Involvement",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each breadth of involvement  broken down by level of participation
+breadthparttab <- crosstable(breadthdatalong, "Breadth of Involvement", by = "Level of Participation",
+                percent_pattern = "{n}") 
+breadthparttab <- as.data.frame(breadthparttab)
+
+breathpartlong <-  breadthparttab %>%
+  pivot_longer(cols = c("No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("breadthOfPart" = "variable")
+
+breathpartlong$Count <- as.numeric(breathpartlong$Count)
+
+#create stacked percent bar chart
+breadthBarChart <- ggplot(breathpartlong, aes(x = fct_relevel(breadthOfPart, c("Insufficient information", "All aspects of research", "Providing endorsement on project", "Disseminating findings (approach unspecified)", "Giving presentations at meetings/conferences", "Writing reports/journal articles", "Interpreting study findings", "Analysing data", "Collecting primary data", "Providing inputs on public-facing materials", "Designing/Modifying interview and/or survey questions", "Implementing the intervention", "Developing intervention", "Recruiting study participants", "Developing sampling procedures", "Choosing research methods", "Designing study (added)", "Background research", "Grant proposal writing", "Developing community-based theories of the research")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Breadth of involvement",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+breadthBarChart
+
+```
+
+##### __3a) Breadth of Community Involvement (2019)__  
+
+```{r breadth 2019, include = TRUE}
+
+breadthdata <- fulldata %>%
+  filter(yearPub == 2019) %>%
+  select(PMID, c("Developing community-based theories of the research":"Insufficient information"))
+
+#pivot wide to long
+
+breadthdatalong <- breadthdata %>%
+  pivot_longer(cols = c("Developing community-based theories of the research", 
+                        "Grant proposal writing", 
+                        "Background research", 
+                        "Designing study (added)", 
+                        "Choosing research methods", 
+                        "Developing sampling procedures", 
+                        "Recruiting study participants", 
+                        "Developing intervention", 
+                        "Implementing the intervention", 
+                        "Designing/Modifying interview and/or survey questions",
+                        "Providing inputs on public-facing materials", 
+                        "Collecting primary data", 
+                        "Analysing data", 
+                        "Interpreting study findings", 
+                        "Writing reports/journal articles", 
+                        "Giving presentations at meetings/conferences",
+                        "Disseminating findings (approach unspecified)",
+                        "Providing endorsement on project", 
+                        "All aspects of research", 
+                        "Insufficient information"),
+               names_to = "Breadth of Involvement",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each breadth of involvement  broken down by level of participation
+breadthparttab <- crosstable(breadthdatalong, "Breadth of Involvement", by = "Level of Participation",
+                percent_pattern = "{n}") 
+breadthparttab <- as.data.frame(breadthparttab)
+
+breathpartlong <-  breadthparttab %>%
+  pivot_longer(cols = c("No involvement", "Consulting", "Co-producing", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("breadthOfPart" = "variable")
+
+breathpartlong$Count <- as.numeric(breathpartlong$Count)
+
+#create stacked percent bar chart
+breadthBarChart <- ggplot(breathpartlong, aes(x = fct_relevel(breadthOfPart, c("Insufficient information", "All aspects of research", "Providing endorsement on project", "Disseminating findings (approach unspecified)", "Giving presentations at meetings/conferences", "Writing reports/journal articles", "Interpreting study findings", "Analysing data", "Collecting primary data", "Providing inputs on public-facing materials", "Designing/Modifying interview and/or survey questions", "Implementing the intervention", "Developing intervention", "Recruiting study participants", "Developing sampling procedures", "Choosing research methods", "Designing study (added)", "Background research", "Grant proposal writing", "Developing community-based theories of the research")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Consulting",  "Co-producing")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Breadth of involvement",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+breadthBarChart
+
+```
+
+##### __3b) Breadth of Community Involvement (2022)__  
+
+```{r breadth 2022, include = TRUE}
+
+breadthdata <- fulldata %>%
+  filter(yearPub == 2022) %>%
+  select(PMID, c("Developing community-based theories of the research":"Insufficient information"))
+
+#pivot wide to long
+
+breadthdatalong <- breadthdata %>%
+  pivot_longer(cols = c("Developing community-based theories of the research", 
+                        "Grant proposal writing", 
+                        "Background research", 
+                        "Designing study (added)", 
+                        "Choosing research methods", 
+                        "Developing sampling procedures", 
+                        "Recruiting study participants", 
+                        "Developing intervention", 
+                        "Implementing the intervention", 
+                        "Designing/Modifying interview and/or survey questions",
+                        "Providing inputs on public-facing materials", 
+                        "Collecting primary data", 
+                        "Analysing data", 
+                        "Interpreting study findings", 
+                        "Writing reports/journal articles", 
+                        "Giving presentations at meetings/conferences",
+                        "Disseminating findings (approach unspecified)",
+                        "Providing endorsement on project", 
+                        "All aspects of research", 
+                        "Insufficient information"),
+               names_to = "Breadth of Involvement",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each breadth of involvement  broken down by level of participation
+breadthparttab <- crosstable(breadthdatalong, "Breadth of Involvement", by = "Level of Participation",
+                percent_pattern = "{n}") 
+breadthparttab <- as.data.frame(breadthparttab)
+
+breathpartlong <-  breadthparttab %>%
+  pivot_longer(cols = c("No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("breadthOfPart" = "variable")
+
+breathpartlong$Count <- as.numeric(breathpartlong$Count)
+
+#create stacked percent bar chart
+breadthBarChart <- ggplot(breathpartlong, aes(x = fct_relevel(breadthOfPart, c("Insufficient information", "All aspects of research", "Providing endorsement on project", "Disseminating findings (approach unspecified)", "Giving presentations at meetings/conferences", "Writing reports/journal articles", "Interpreting study findings", "Analysing data", "Collecting primary data", "Providing inputs on public-facing materials", "Designing/Modifying interview and/or survey questions", "Implementing the intervention", "Developing intervention", "Recruiting study participants", "Developing sampling procedures", "Choosing research methods", "Designing study (added)", "Background research", "Grant proposal writing", "Developing community-based theories of the research")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Breadth of involvement",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+breadthBarChart
+
+```
+
