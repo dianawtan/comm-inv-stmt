@@ -2,7 +2,8 @@
 title: "An analysis of the 'community involvement statements' published in _Autism_"
 author: "Diana Tan"
 date: "2023-10-13"
-output:   
+output:
+  word_document: default
   html_document:
     code_folding: hide
 ---
@@ -31,7 +32,6 @@ fulldata <- read_excel("raw-data/comm-inv_interim-data_20231013.xlsx", sheet = "
 Between 1 Jan 2019 and 31 Dec 2019, _Autism_ published __116 research papers__. __12 of which (10.3%)__ included information on community involvement activity. 
 Between 1 Jan 2022 and 31 Dec 2022, following the introduction of the mandatory reporting of community involvement policy in Jan 2021, _Autism_ published __167 research papers__. __90 of which (53.9%)__ included information on community involvement activity.
 
-*Observation: Proportion of studies reporting community involvement increased by over 5-fold over the two time points. In our systematic review, this increase was only two-fold (about 32 papers in 2019 and 66 papers in 2022). 
 
 ```{r frequency analysis, include = TRUE}
 
@@ -74,21 +74,29 @@ partdata <- fulldata %>%
   select("levelOfPart", "yearPub")
 
 partdata <- as.data.frame(table(partdata))
+#partdata <- mutate(partdata, yearPub=factor(yearPub, levels = c("2022", "2019")))
+
 
 partBarChart <- ggplot(partdata, aes(fill = yearPub, x = fct_relevel(levelOfPart, c("Insufficient information", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")), y = Freq)) +
   geom_col(position = "stack") +
-  labs(x = "Level of Participation",
+  labs(x = "Extent of community involvement",
        y = "Number of articles",
        fill = "Year") +
+  scale_fill_brewer(palette = "Set2") +
+  theme(legend.position = "bottom") +
   coord_flip()
 
 partBarChart
 
-```
+ggsave("levelofpart.png", plot = partBarChart, device = "png", scale = 0.7, dpi = 300, width = 10, height = 6.5, unit = "in")
+
+
+ ```
 <br>
 <br>
 
 ##### __3) Breadth of Community Involvement (OVERALL)__  
+Based on detailed coding scheme for the breadth of community involvement. 
 
 ```{r breadth overall, include = TRUE}
 
@@ -101,11 +109,11 @@ breadthdatalong <- breadthdata %>%
   pivot_longer(cols = c("Developing community-based theories of the research", 
                         "Grant proposal writing", 
                         "Background research", 
-                        "Designing study (added)", 
+                        "Designing study", 
                         "Choosing research methods", 
                         "Developing sampling procedures", 
                         "Recruiting study participants", 
-                        "Developing intervention", 
+                        "Developing/Adapting intervention", 
                         "Implementing the intervention", 
                         "Designing/Modifying interview and/or survey questions",
                         "Providing inputs on public-facing materials", 
@@ -136,7 +144,7 @@ breathpartlong <-  breadthparttab %>%
 breathpartlong$Count <- as.numeric(breathpartlong$Count)
 
 #create stacked percent bar chart
-breadthBarChart <- ggplot(breathpartlong, aes(x = fct_relevel(breadthOfPart, c("Insufficient information", "All aspects of research", "Providing endorsement on project", "Disseminating findings (approach unspecified)", "Giving presentations at meetings/conferences", "Writing reports/journal articles", "Interpreting study findings", "Analysing data", "Collecting primary data", "Providing inputs on public-facing materials", "Designing/Modifying interview and/or survey questions", "Implementing the intervention", "Developing intervention", "Recruiting study participants", "Developing sampling procedures", "Choosing research methods", "Designing study (added)", "Background research", "Grant proposal writing", "Developing community-based theories of the research")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+breadthBarChart <- ggplot(breathpartlong, aes(x = fct_relevel(breadthOfPart, c("Insufficient information", "All aspects of research", "Providing endorsement on project", "Disseminating findings (approach unspecified)", "Giving presentations at meetings/conferences", "Writing reports/journal articles", "Interpreting study findings", "Analysing data", "Collecting primary data", "Providing inputs on public-facing materials", "Designing/Modifying interview and/or survey questions", "Implementing the intervention", "Developing/Adapting intervention", "Recruiting study participants", "Developing sampling procedures", "Choosing research methods", "Designing study", "Background research", "Grant proposal writing", "Developing community-based theories of the research")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
   geom_bar(position = "fill", stat = "identity") +
   theme(legend.position = "bottom", 
         legend.text = element_text(size = 7),
@@ -155,6 +163,7 @@ breadthBarChart
 ```
 
 ##### __3a) Breadth of Community Involvement (2019)__  
+Based on detailed coding scheme for the breadth of community involvement. 
 
 ```{r breadth 2019, include = TRUE}
 
@@ -168,11 +177,11 @@ breadthdatalong <- breadthdata %>%
   pivot_longer(cols = c("Developing community-based theories of the research", 
                         "Grant proposal writing", 
                         "Background research", 
-                        "Designing study (added)", 
+                        "Designing study", 
                         "Choosing research methods", 
                         "Developing sampling procedures", 
                         "Recruiting study participants", 
-                        "Developing intervention", 
+                        "Developing/Adapting intervention", 
                         "Implementing the intervention", 
                         "Designing/Modifying interview and/or survey questions",
                         "Providing inputs on public-facing materials", 
@@ -203,7 +212,7 @@ breathpartlong <-  breadthparttab %>%
 breathpartlong$Count <- as.numeric(breathpartlong$Count)
 
 #create stacked percent bar chart
-breadthBarChart <- ggplot(breathpartlong, aes(x = fct_relevel(breadthOfPart, c("Insufficient information", "All aspects of research", "Providing endorsement on project", "Disseminating findings (approach unspecified)", "Giving presentations at meetings/conferences", "Writing reports/journal articles", "Interpreting study findings", "Analysing data", "Collecting primary data", "Providing inputs on public-facing materials", "Designing/Modifying interview and/or survey questions", "Implementing the intervention", "Developing intervention", "Recruiting study participants", "Developing sampling procedures", "Choosing research methods", "Designing study (added)", "Background research", "Grant proposal writing", "Developing community-based theories of the research")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Consulting",  "Co-producing")))) +
+breadthBarChart <- ggplot(breathpartlong, aes(x = fct_relevel(breadthOfPart, c("Insufficient information", "All aspects of research", "Providing endorsement on project", "Disseminating findings (approach unspecified)", "Giving presentations at meetings/conferences", "Writing reports/journal articles", "Interpreting study findings", "Analysing data", "Collecting primary data", "Providing inputs on public-facing materials", "Designing/Modifying interview and/or survey questions", "Implementing the intervention", "Developing/Adapting intervention", "Recruiting study participants", "Developing sampling procedures", "Choosing research methods", "Designing study", "Background research", "Grant proposal writing", "Developing community-based theories of the research")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Consulting",  "Co-producing")))) +
   geom_bar(position = "fill", stat = "identity") +
   theme(legend.position = "bottom", 
         legend.text = element_text(size = 7),
@@ -222,11 +231,13 @@ breadthBarChart
 ```
 
 ##### __3b) Breadth of Community Involvement (2022)__  
+Based on detailed coding scheme for the breadth of community involvement. 
 
 ```{r breadth 2022, include = TRUE}
 
 breadthdata <- fulldata %>%
   filter(yearPub == 2022) %>%
+  filter(commInvPresence == "Yes") %>%
   select(PMID, c("Developing community-based theories of the research":"Insufficient information"))
 
 #pivot wide to long
@@ -235,11 +246,11 @@ breadthdatalong <- breadthdata %>%
   pivot_longer(cols = c("Developing community-based theories of the research", 
                         "Grant proposal writing", 
                         "Background research", 
-                        "Designing study (added)", 
+                        "Designing study", 
                         "Choosing research methods", 
                         "Developing sampling procedures", 
                         "Recruiting study participants", 
-                        "Developing intervention", 
+                        "Developing/Adapting intervention", 
                         "Implementing the intervention", 
                         "Designing/Modifying interview and/or survey questions",
                         "Providing inputs on public-facing materials", 
@@ -270,7 +281,7 @@ breathpartlong <-  breadthparttab %>%
 breathpartlong$Count <- as.numeric(breathpartlong$Count)
 
 #create stacked percent bar chart
-breadthBarChart <- ggplot(breathpartlong, aes(x = fct_relevel(breadthOfPart, c("Insufficient information", "All aspects of research", "Providing endorsement on project", "Disseminating findings (approach unspecified)", "Giving presentations at meetings/conferences", "Writing reports/journal articles", "Interpreting study findings", "Analysing data", "Collecting primary data", "Providing inputs on public-facing materials", "Designing/Modifying interview and/or survey questions", "Implementing the intervention", "Developing intervention", "Recruiting study participants", "Developing sampling procedures", "Choosing research methods", "Designing study (added)", "Background research", "Grant proposal writing", "Developing community-based theories of the research")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+breadthBarChart <- ggplot(breathpartlong, aes(x = fct_relevel(breadthOfPart, c("Insufficient information", "All aspects of research", "Providing endorsement on project", "Disseminating findings (approach unspecified)", "Giving presentations at meetings/conferences", "Writing reports/journal articles", "Interpreting study findings", "Analysing data", "Collecting primary data", "Providing inputs on public-facing materials", "Designing/Modifying interview and/or survey questions", "Implementing the intervention", "Developing/Adapting intervention", "Recruiting study participants", "Developing sampling procedures", "Choosing research methods", "Designing study", "Background research", "Grant proposal writing", "Developing community-based theories of the research")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
   geom_bar(position = "fill", stat = "identity") +
   theme(legend.position = "bottom", 
         legend.text = element_text(size = 7),
@@ -288,3 +299,894 @@ breadthBarChart
 
 ```
 
+
+##### __4) Breadth of Community Involvement (OVERALL)__  
+Based on broad coding scheme for the breadth of community involvement. 
+
+```{r breadth broad overall, include = TRUE}
+
+breadthbroaddata <- fulldata %>%
+  select(PMID, c("Conceptualisation":"Insufficient information"))
+
+#pivot wide to long
+
+breadthbroadlong <- breadthbroaddata %>%
+  pivot_longer(cols = c("Conceptualisation",
+                        "Design",
+                        "Implementation",
+                        "Analysis",
+                        "Dissemination",
+                        "Insufficient information"),
+               names_to = "Breadth of Involvement",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each breadth of involvement  broken down by level of participation
+breadthbroadtab <- crosstable(breadthbroadlong, "Breadth of Involvement", by = "Level of Participation",
+                percent_pattern = "{n}") 
+breadthbroadtab <- as.data.frame(breadthbroadtab)
+
+breathbroadtablong <-  breadthbroadtab %>%
+  pivot_longer(cols = c("No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("breadthOfPart" = "variable")
+
+breathbroadtablong$Count <- as.numeric(breathbroadtablong$Count)
+
+#create stacked percent bar chart
+breadthBroadBarChart <- ggplot(breathbroadtablong, aes(x = fct_relevel(breadthOfPart,c("Insufficient information", "Dissemination", "Analysis", "Implementation", "Design", "Conceptualisation")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Breadth of involvement",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+breadthBroadBarChart
+
+
+
+
+```
+
+##### __4a) Breadth of Community Involvement (2019)__  
+Based on broad coding scheme for the breadth of community involvement for 2019 papers. 
+
+```{r breadth broad 2019, include = TRUE}
+
+breadthbroaddata <- fulldata %>%
+  filter(yearPub == 2019) %>%
+  select(PMID, c("Conceptualisation":"Insufficient information"))
+
+#pivot wide to long
+
+breadthbroadlong <- breadthbroaddata %>%
+  pivot_longer(cols = c("Conceptualisation",
+                        "Design",
+                        "Implementation",
+                        "Analysis",
+                        "Dissemination",
+                        "Insufficient information"),
+               names_to = "Breadth of Involvement",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each breadth of involvement  broken down by level of participation
+breadthbroadtab <- crosstable(breadthbroadlong, "Breadth of Involvement", by = "Level of Participation",
+                percent_pattern = "{n}") 
+breadthbroadtab <- as.data.frame(breadthbroadtab)
+
+breathbroadtablong <-  breadthbroadtab %>%
+  pivot_longer(cols = c("No involvement", "Consulting", "Co-producing", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("breadthOfPart" = "variable")
+
+breathbroadtablong$Count <- as.numeric(breathbroadtablong$Count)
+
+#create stacked percent bar chart
+breadthBroadBarChart <- ggplot(breathbroadtablong, aes(x = fct_relevel(breadthOfPart,c("Insufficient information", "Dissemination", "Analysis", "Implementation", "Design", "Conceptualisation")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Breadth of involvement",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+breadthBroadBarChart
+
+```
+
+##### __4b) Breadth of Community Involvement (2022)__  
+Based on broad coding scheme for the breadth of community involvement for 2022 papers. 
+
+```{r breadth broad 2022, include = TRUE}
+
+breadthbroaddata <- fulldata %>%
+  filter(yearPub == 2022) %>%
+  select(PMID, c("Conceptualisation":"Insufficient information"))
+
+#pivot wide to long
+
+breadthbroadlong <- breadthbroaddata %>%
+  pivot_longer(cols = c("Conceptualisation",
+                        "Design",
+                        "Implementation",
+                        "Analysis",
+                        "Dissemination",
+                        "Insufficient information"),
+               names_to = "Breadth of Involvement",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each breadth of involvement  broken down by level of participation
+breadthbroadtab <- crosstable(breadthbroadlong, "Breadth of Involvement", by = "Level of Participation",
+                percent_pattern = "{n}") 
+breadthbroadtab <- as.data.frame(breadthbroadtab)
+
+breathbroadtablong <-  breadthbroadtab %>%
+  pivot_longer(cols = c("No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("breadthOfPart" = "variable")
+
+breathbroadtablong$Count <- as.numeric(breathbroadtablong$Count)
+
+#create stacked percent bar chart
+breadthBroadBarChart <- ggplot(breathbroadtablong, aes(x = fct_relevel(breadthOfPart,c("Insufficient information", "Dissemination", "Analysis", "Implementation", "Design", "Conceptualisation")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Breadth of involvement",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+breadthBroadBarChart
+
+```
+#### ___4c) Panel diagram breadth x level of participation ___
+```{r panel diagram breadth x level}
+
+breadthbroaddata <- fulldata %>%
+  select(PMID, yearPub, c("Conceptualisation":"Insufficient information"))
+
+breadthbroadlong <- breadthbroaddata %>%
+  pivot_longer(cols = c("Conceptualisation",
+                        "Design",
+                        "Implementation",
+                        "Analysis",
+                        "Dissemination",
+                        "Insufficient information"),
+               names_to = "Breadth of Involvement",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each breadth of involvement  broken down by level of participation
+breadthbroadtab <- crosstable(breadthbroadlong, "Breadth of Involvement", by = c("Level of Participation", "yearPub"),
+                percent_pattern = "{n}") 
+breadthbroadtab <- as.data.frame(breadthbroadtab)
+
+breathbroadtablong <-  breadthbroadtab %>%
+  pivot_longer(cols = c("Level of Participation=No involvement & yearPub=2019", "Level of Participation=Informing & yearPub=2019", "Level of Participation=Consulting & yearPub=2019", "Level of Participation=Engaging & yearPub=2019", "Level of Participation=Co-producing & yearPub=2019", "Level of Participation=Community led & yearPub=2019", "Level of Participation=Community controlled & yearPub=2019", "Level of Participation=Insufficient information & yearPub=2019","Level of Participation=No involvement & yearPub=2022", "Level of Participation=Informing & yearPub=2022", "Level of Participation=Consulting & yearPub=2022", "Level of Participation=Engaging & yearPub=2022", "Level of Participation=Co-producing & yearPub=2022", "Level of Participation=Community led & yearPub=2022", "Level of Participation=Community controlled & yearPub=2022", "Level of Participation=Insufficient information & yearPub=2022"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("breadthOfPart" = "variable")
+
+breathbroadtablong$Count <- as.numeric(breathbroadtablong$Count)
+
+#delimiting column
+
+breathbroadtablong <- separate_wider_delim(breathbroadtablong, cols = levelOfPart, delim = " & ", names = c("Level of Participation", "Year of Publication"))
+
+breathbroadtablong$`Level of Participation` <- gsub("Level of Participation=","",breathbroadtablong$`Level of Participation`)
+breathbroadtablong$`Year of Publication` <- gsub("yearPub=","",breathbroadtablong$`Year of Publication`)
+
+breathbroadtablong <- mutate(breathbroadtablong, `Level of Participation`=factor(`Level of Participation`, levels = c("Community controlled","Community led","Co-producing","Engaging","Consulting","Informing","Insufficient information", "No involvement")))
+
+breadthBroadBarChart <- ggplot(breathbroadtablong, aes(fill = fct_relevel(`Year of Publication`, c("2022","2019")), y = Count, x = fct_relevel(breadthOfPart,c("Insufficient information", "Dissemination", "Analysis", "Implementation", "Design", "Conceptualisation")))) +
+  geom_bar(stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Breadth of involvement",
+       y = "Number of published studies",
+       fill = "Year of Publication") +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip() +
+  facet_wrap(~ `Level of Participation`, ncol = 3)
+
+breadthBroadBarChart
+
+#saving image
+ggsave(filename = "breadthXlevel.png",plot = breadthBroadBarChart, device = "png", scale = 1, dpi = 300)
+
+```
+
+
+
+
+##### ___5) Research disciplines / areas (Overall)___  
+
+```{r research disciplines overall}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#research disciplines
+partDisdata <- fulldata %>%
+  select(c("levelOfPart", "researchArea"))
+
+partDisdata <- as.data.frame(table(partDisdata))
+
+partDisBarChart <- ggplot(partDisdata, aes(x = fct_relevel(researchArea, c("Diagnosis", "Biology", "Risk factors", "Treatments & Interventions", "Services", "Lifespan issues", "Infrastructure and surveillance")), y = Freq, fill = fct_relevel(levelOfPart, c("Community controlled", "Community led", "Co-producing", "Engaging", "Consulting", "Informing", "No community involvement", "Insufficient information")))) +
+  geom_col() +
+  labs(x = "Research Areas",
+       y = "Number of articles",
+       fill = "Level of Participation") +
+#  scale_fill_manual(values = cbPalette) +
+  scale_fill_brewer(palette = "Set3") +
+  coord_flip()
+
+partDisBarChart
+
+```
+
+##### ___5a) Research disciplines / areas (2019)___  
+
+```{r research disciplines 2019}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#research disciplines
+partDisdata <- fulldata %>%
+  filter(yearPub == 2019) %>%
+  select(c("levelOfPart", "researchArea"))
+
+partDisdata <- as.data.frame(table(partDisdata))
+
+partDisBarChart <- ggplot(partDisdata, aes(x = fct_relevel(researchArea, c("Diagnosis", "Biology", "Risk factors", "Treatments & Interventions", "Services", "Lifespan issues", "Infrastructure and surveillance")), y = Freq, fill = fct_relevel(levelOfPart, c("Community controlled", "Community led", "Co-producing", "Engaging", "Consulting", "Informing", "No community involvement", "Insufficient information")))) +
+  geom_col() +
+  labs(x = "Research Areas",
+       y = "Number of articles",
+       fill = "Level of Participation") +
+#  scale_fill_manual(values = cbPalette) +
+  scale_fill_brewer(palette = "Set3") +
+  coord_flip()
+
+partDisBarChart
+
+```
+
+##### ___5b) Research disciplines / areas (2022)___  
+
+```{r research disciplines 2022}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#research disciplines
+partDisdata <- fulldata %>%
+  filter(yearPub == 2022) %>%
+  select(c("levelOfPart", "researchArea"))
+
+partDisdata <- as.data.frame(table(partDisdata))
+
+partDisBarChart <- ggplot(partDisdata, aes(x = fct_relevel(researchArea, c("Diagnosis", "Biology", "Risk factors", "Treatments & Interventions", "Services", "Lifespan issues", "Infrastructure and surveillance")), y = Freq, fill = fct_relevel(levelOfPart, c("Community controlled", "Community led", "Co-producing", "Engaging", "Consulting", "Informing", "No community involvement", "Insufficient information")))) +
+  geom_col() +
+  labs(x = "Research Areas",
+       y = "Number of articles",
+       fill = "Level of Participation") +
+#  scale_fill_manual(values = cbPalette) +
+  scale_fill_brewer(palette = "Set3") +
+  coord_flip()
+
+partDisBarChart
+
+```
+
+##### ___6) Composition of community members (Overall)___  
+
+```{r comm members overall}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#community members
+partCommdata <- fulldata %>%
+  select(c("Autistic adults":"Cannot be determined"))
+
+# pivot wide to long
+
+partCommdataLong <- partCommdata %>%
+  pivot_longer(cols = c("Autistic adults",
+                        "Autistic young people",
+                        "Autistic researchers",
+                        "Researchers and parents of autistic people",
+                        "Researchers and professionals",
+                        "Parents of autistic adults",
+                        "Parents of autistic young people",
+                        "Family members (unspecified connection)",
+                        "Parents of autistic people (unspecified age)",
+                        "Community members (unspecified connection)",
+                        "Clinicians/Healthcare providers",
+                        "Educators",
+                        "Professionals (unspecified specialty)",
+                        "Policymakers",
+                        "Funders",
+                        "Patient/Advocacy organisations",
+                        "Cannot be determined"),
+               names_to = "Community Members",
+               values_to = "Level of Participation")
+
+#create cross table to calculate number of articles for each group of community member broken down by level of participation
+
+commparttab <- crosstable(partCommdataLong, "Community Members", by = "Level of Participation",
+                percent_pattern = "{n}") 
+commparttab <- as.data.frame(commparttab)
+
+commparttablong <-  commparttab %>%
+  pivot_longer(cols = c("No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("commMembers" = "variable")
+
+commparttablong$Count <- as.numeric(commparttablong$Count)
+
+#create stacked percent bar chart
+commPartBarChart <- ggplot(commparttablong, aes(x = fct_relevel(commMembers, c("Cannot be determined","Patient/Advocacy organisations","Funders","Policymakers","Professionals (unspecified specialty)","Educators","Clinicians/Healthcare providers","Community members (unspecified connection)","Parents of autistic people (unspecified age)","Family members (unspecified connection)","Parents of autistic young people","Parents of autistic adults","Researchers and professionals","Researchers and parents of autistic people","Autistic researchers","Autistic young people","Autistic adults")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Community members",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+commPartBarChart
+
+```
+
+##### ___6a) Composition of community members (2019)___  
+
+```{r comm members 2019}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#community members
+partCommdata <- fulldata %>%
+  filter(yearPub == 2019) %>%
+  select(c("Autistic adults":"Cannot be determined"))
+
+# pivot wide to long
+
+partCommdataLong <- partCommdata %>%
+  pivot_longer(cols = c("Autistic adults",
+                        "Autistic young people",
+                        "Autistic researchers",
+                        "Researchers and parents of autistic people",
+                        "Researchers and professionals",
+                        "Parents of autistic adults",
+                        "Parents of autistic young people",
+                        "Family members (unspecified connection)",
+                        "Parents of autistic people (unspecified age)",
+                        "Community members (unspecified connection)",
+                        "Clinicians/Healthcare providers",
+                        "Educators",
+                        "Professionals (unspecified specialty)",
+                        "Policymakers",
+                        "Funders",
+                        "Patient/Advocacy organisations",
+                        "Cannot be determined"),
+               names_to = "Community Members",
+               values_to = "Level of Participation")
+
+#create cross table to calculate number of articles for each group of community member broken down by level of participation
+
+commparttab <- crosstable(partCommdataLong, "Community Members", by = "Level of Participation",
+                percent_pattern = "{n}") 
+commparttab <- as.data.frame(commparttab)
+
+commparttablong <-  commparttab %>%
+  pivot_longer(cols = c("No involvement", "Consulting", "Co-producing", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("commMembers" = "variable")
+
+commparttablong$Count <- as.numeric(commparttablong$Count)
+
+#create stacked percent bar chart
+commPartBarChart <- ggplot(commparttablong, aes(x = fct_relevel(commMembers, c("Cannot be determined","Patient/Advocacy organisations","Funders","Policymakers","Professionals (unspecified specialty)","Educators","Clinicians/Healthcare providers","Community members (unspecified connection)","Parents of autistic people (unspecified age)","Family members (unspecified connection)","Parents of autistic young people","Parents of autistic adults","Researchers and professionals","Researchers and parents of autistic people","Autistic researchers","Autistic young people","Autistic adults")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Community members",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+commPartBarChart
+
+```
+
+##### ___6b) Composition of community members (2022)___  
+
+```{r comm members 2022}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#community members
+partCommdata <- fulldata %>%
+  filter(yearPub == 2022) %>%
+  select(c("Autistic adults":"Cannot be determined"))
+
+# pivot wide to long
+
+partCommdataLong <- partCommdata %>%
+  pivot_longer(cols = c("Autistic adults",
+                        "Autistic young people",
+                        "Autistic researchers",
+                        "Researchers and parents of autistic people",
+                        "Researchers and professionals",
+                        "Parents of autistic adults",
+                        "Parents of autistic young people",
+                        "Family members (unspecified connection)",
+                        "Parents of autistic people (unspecified age)",
+                        "Community members (unspecified connection)",
+                        "Clinicians/Healthcare providers",
+                        "Educators",
+                        "Professionals (unspecified specialty)",
+                        "Policymakers",
+                        "Funders",
+                        "Patient/Advocacy organisations",
+                        "Cannot be determined"),
+               names_to = "Community Members",
+               values_to = "Level of Participation")
+
+#create cross table to calculate number of articles for each group of community member broken down by level of participation
+
+commparttab <- crosstable(partCommdataLong, "Community Members", by = "Level of Participation",
+                percent_pattern = "{n}") 
+commparttab <- as.data.frame(commparttab)
+
+commparttablong <-  commparttab %>%
+  pivot_longer(cols = c("No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("commMembers" = "variable")
+
+commparttablong$Count <- as.numeric(commparttablong$Count)
+
+#create stacked percent bar chart
+commPartBarChart <- ggplot(commparttablong, aes(x = fct_relevel(commMembers, c("Cannot be determined","Patient/Advocacy organisations","Funders","Policymakers","Professionals (unspecified specialty)","Educators","Clinicians/Healthcare providers","Community members (unspecified connection)","Parents of autistic people (unspecified age)","Family members (unspecified connection)","Parents of autistic young people","Parents of autistic adults","Researchers and professionals","Researchers and parents of autistic people","Autistic researchers","Autistic young people","Autistic adults")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Community members",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+commPartBarChart
+
+```
+
+##### ___7) Composition of community members - Broad (Overall)___  
+
+```{r comm members broad overall}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#community members
+partCommdata <- fulldata %>%
+  select(c("Autistic People":"Others"))
+
+# pivot wide to long
+
+partCommdataLong <- partCommdata %>%
+  pivot_longer(cols = c("Autistic People",
+                        "Families of Autistic People",
+                        "Professionals",
+                        "Administration",
+                        "Others"),
+               names_to = "Community Members",
+               values_to = "Level of Participation")
+
+#create cross table to calculate number of articles for each group of community member broken down by level of participation
+
+commparttab <- crosstable(partCommdataLong, "Community Members", by = "Level of Participation",
+                percent_pattern = "{n}") 
+commparttab <- as.data.frame(commparttab)
+
+commparttablong <-  commparttab %>%
+  pivot_longer(cols = c("No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("commMembers" = "variable")
+
+commparttablong$Count <- as.numeric(commparttablong$Count)
+
+#create stacked percent bar chart
+commPartBarChart <- ggplot(commparttablong, aes(x = fct_relevel(commMembers,c("Others","Administration","Professionals","Families of Autistic People","Autistic People")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Community members",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+commPartBarChart
+
+```
+
+##### ___7a) Composition of community members - Broad (2019)___  
+
+```{r comm members broad 2019}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#community members
+partCommdata <- fulldata %>%
+  filter(yearPub == 2019) %>%
+  select(c("Autistic People":"Others"))
+
+# pivot wide to long
+
+partCommdataLong <- partCommdata %>%
+  pivot_longer(cols = c("Autistic People",
+                        "Families of Autistic People",
+                        "Professionals",
+                        "Administration",
+                        "Others"),
+               names_to = "Community Members",
+               values_to = "Level of Participation")
+
+#create cross table to calculate number of articles for each group of community member broken down by level of participation
+
+commparttab <- crosstable(partCommdataLong, "Community Members", by = "Level of Participation",
+                percent_pattern = "{n}") 
+commparttab <- as.data.frame(commparttab)
+
+commparttablong <-  commparttab %>%
+  pivot_longer(cols = c("No involvement", "Consulting", "Co-producing", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("commMembers" = "variable")
+
+commparttablong$Count <- as.numeric(commparttablong$Count)
+
+#create stacked percent bar chart
+commPartBarChart <- ggplot(commparttablong, aes(x = fct_relevel(commMembers,c("Others","Administration","Professionals","Families of Autistic People","Autistic People")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Community members",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+commPartBarChart
+
+```
+
+
+##### ___7b) Composition of community members - Broad (2022)___  
+
+```{r comm members broad 2022}
+
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#community members
+partCommdata <- fulldata %>%
+  filter(yearPub == 2022) %>%
+  select(c("Autistic People":"Others"))
+
+# pivot wide to long
+
+partCommdataLong <- partCommdata %>%
+  pivot_longer(cols = c("Autistic People",
+                        "Families of Autistic People",
+                        "Professionals",
+                        "Administration",
+                        "Others"),
+               names_to = "Community Members",
+               values_to = "Level of Participation")
+
+#create cross table to calculate number of articles for each group of community member broken down by level of participation
+
+commparttab <- crosstable(partCommdataLong, "Community Members", by = "Level of Participation",
+                percent_pattern = "{n}") 
+commparttab <- as.data.frame(commparttab)
+
+commparttablong <-  commparttab %>%
+  pivot_longer(cols = c("No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("commMembers" = "variable")
+
+commparttablong$Count <- as.numeric(commparttablong$Count)
+
+#create stacked percent bar chart
+commPartBarChart <- ggplot(commparttablong, aes(x = fct_relevel(commMembers,c("Others","Administration","Professionals","Families of Autistic People","Autistic People")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "No involvement", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Community members",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+commPartBarChart
+
+```
+
+
+#### ___7c) Composition of community members(Broad) X Level of Participation___
+```{r panel diagram comm members x level}
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+commdata <- fulldata %>%
+  filter(commInvPresence == "Yes") %>%
+  select(PMID, yearPub, c("Autistic People":"Insufficient information...54")) %>%
+  rename("Insufficient information" = "Insufficient information...54")
+
+# pivot wide to long
+
+partCommdataLong <- commdata %>%
+  pivot_longer(cols = c("Autistic People",
+                        "Families of Autistic People",
+                        "Professionals",
+                        "Administration",
+                        "Insufficient information"),
+               names_to = "Community Members",
+               values_to = "Level of Participation")
+
+#create cross table to calculate number of articles for each group of community member broken down by level of participation
+
+commparttab <- crosstable(partCommdataLong, "Community Members", by = c("Level of Participation", "yearPub"),
+                percent_pattern = "{n}") 
+commparttab <- as.data.frame(commparttab)
+
+commparttablong <-  commparttab %>%
+  pivot_longer(cols = c("Level of Participation=No involvement & yearPub=2019", "Level of Participation=Informing & yearPub=2019", "Level of Participation=Consulting & yearPub=2019", "Level of Participation=Engaging & yearPub=2019", "Level of Participation=Co-producing & yearPub=2019", "Level of Participation=Community led & yearPub=2019", "Level of Participation=Community controlled & yearPub=2019", "Level of Participation=Insufficient information & yearPub=2019","Level of Participation=No involvement & yearPub=2022", "Level of Participation=Informing & yearPub=2022", "Level of Participation=Consulting & yearPub=2022", "Level of Participation=Engaging & yearPub=2022", "Level of Participation=Co-producing & yearPub=2022", "Level of Participation=Community led & yearPub=2022", "Level of Participation=Community controlled & yearPub=2022", "Level of Participation=Insufficient information & yearPub=2022"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("Community members" = "variable")
+
+commparttablong$Count <- as.numeric(commparttablong$Count)
+
+
+
+#delimiting column
+
+commparttablong <- separate_wider_delim(commparttablong, cols = levelOfPart, delim = " & ", names = c("Level of Participation", "Year of Publication"))
+
+commparttablong$`Level of Participation` <- gsub("Level of Participation=","",commparttablong$`Level of Participation`)
+commparttablong$`Year of Publication` <- gsub("yearPub=","",commparttablong$`Year of Publication`)
+
+commparttablong <- mutate(commparttablong, `Level of Participation`=factor(`Level of Participation`, levels = c("Community controlled","Community led","Co-producing","Engaging","Consulting","Informing","Insufficient information", "No involvement"))) %>%
+  filter(`Level of Participation` != "No involvement")
+
+
+
+commpartBarChart <- ggplot(commparttablong, aes(fill = `Year of Publication`, y = Count, x = fct_relevel(`Community members`,c("Insufficient information", "Administration", "Professionals", "Families of Autistic People", "Autistic People")))) +
+  geom_bar(stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Community members involved",
+       y = "Number of published studies",
+       fill = "Year of Publication") +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip() +
+  facet_wrap(~ `Level of Participation`, ncol = 3)
+
+commpartBarChart
+
+#saving image
+ggsave(filename = "commXlevel.png",plot = commpartBarChart, device = "png", scale = 0.5, dpi = 300, width = 17, height = 14, units = "in")
+
+```
+
+
+##### ___8) Funders (OVERALL)___  
+
+```{r funders overall}
+
+funderdata <- fulldata %>%
+  select(c("Industry":"None"))
+
+#pivot wide to long
+
+funderdatalong <- funderdata %>%
+  pivot_longer(cols = c("Industry", "Trust", "Government", "University", "Service providers", "None"),
+               names_to = "Funder",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each funder broken down by level of participation
+fundparttab <- crosstable(funderdatalong, "Funder", by = "Level of Participation",
+                percent_pattern = "{n}") 
+fundparttab <- as.data.frame(fundparttab)
+
+fundpartlong <-  fundparttab %>%
+  pivot_longer(cols = c("Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("funder" = "variable")
+
+fundpartlong$Count <- as.numeric(fundpartlong$Count)
+
+#create stacked percent bar chart
+fundBarChart <- ggplot(fundpartlong, aes(x = fct_relevel(funder, c("Industry", "Trust", "Government", "University", "Service providers", "None")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Type of Funders",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+fundBarChart
+
+```
+
+
+##### ___8a) Funders (2019)___  
+
+```{r funders 2019}
+
+funderdata <- fulldata %>%
+  filter(yearPub == 2019) %>%
+  select(c("Industry":"None"))
+
+#pivot wide to long
+
+funderdatalong <- funderdata %>%
+  pivot_longer(cols = c("Industry", "Trust", "Government", "University", "Service providers", "None"),
+               names_to = "Funder",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each funder broken down by level of participation
+fundparttab <- crosstable(funderdatalong, "Funder", by = "Level of Participation",
+                percent_pattern = "{n}") 
+fundparttab <- as.data.frame(fundparttab)
+
+fundpartlong <-  fundparttab %>%
+  pivot_longer(cols = c("Consulting","Co-producing", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("funder" = "variable")
+
+fundpartlong$Count <- as.numeric(fundpartlong$Count)
+
+#create stacked percent bar chart
+fundBarChart <- ggplot(fundpartlong, aes(x = fct_relevel(funder, c("Industry", "Trust", "Government", "University", "Service providers", "None")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Type of Funders",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+fundBarChart
+
+```
+
+
+##### ___8a) Funders (2022)___  
+
+```{r funders 2022}
+
+funderdata <- fulldata %>%
+  filter(yearPub == 2022) %>%
+  select(c("Industry":"None"))
+
+#pivot wide to long
+
+funderdatalong <- funderdata %>%
+  pivot_longer(cols = c("Industry", "Trust", "Government", "University", "Service providers", "None"),
+               names_to = "Funder",
+               values_to = "Level of Participation") 
+
+#create cross table to calculate number of articles for each funder broken down by level of participation
+fundparttab <- crosstable(funderdatalong, "Funder", by = "Level of Participation",
+                percent_pattern = "{n}") 
+fundparttab <- as.data.frame(fundparttab)
+
+fundpartlong <-  fundparttab %>%
+  pivot_longer(cols = c("Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled", "Insufficient information"),
+               names_to = "levelOfPart",
+               values_to = "Count") %>%
+  select(c("variable", "levelOfPart", "Count")) %>%
+  rename("funder" = "variable")
+
+fundpartlong$Count <- as.numeric(fundpartlong$Count)
+
+#create stacked percent bar chart
+fundBarChart <- ggplot(fundpartlong, aes(x = fct_relevel(funder, c("Industry", "Trust", "Government", "University", "Service providers", "None")), y = Count, fill = fct_relevel(levelOfPart, c("Insufficient information", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")))) +
+  geom_bar(position = "fill", stat = "identity") +
+  theme(legend.position = "bottom", 
+        legend.text = element_text(size = 7),
+        legend.key.size = unit(.2, "cm"),
+        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8)) +
+  labs(x = "Type of Funders",
+       y = "Percentage of published studies",
+       fill = "") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_brewer(palette = "Set2") +
+  coord_flip()
+
+fundBarChart
+
+```
