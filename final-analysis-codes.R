@@ -1,6 +1,6 @@
 #### Analysis for community involvement statement project
 ### Results reported in main manuscript
-### Last updated on 13 Mar 2024
+### Last updated on 14 Jun 2024
 
 
 #### preamble ----
@@ -8,7 +8,8 @@
 library(readxl)
 library(tidyverse)
 library(crosstable)
-
+library(stringr)
+library(ggpattern)
 
 ### data import
 fulldata <- read_excel("raw-data/comm-inv_data_20231129.xlsx", sheet = "FINALISED")
@@ -42,7 +43,7 @@ mapPalette <- c("< 10" = "#ff0000",
 #### main analysis ----
 # organised according to results section
 
-### frequency of reporting community involvement (Fig 2) ----
+### frequency of reporting community involvement (Fig S1) ----
 
 # frequency of including community involvement statement and community involvement itself, and percentages grouped by year of publication
 ciscifreq <- fulldata %>%
@@ -58,7 +59,47 @@ cifreq <- fulldata %>%
 
 cifreq$yearPub <- as.factor(cifreq$yearPub)
 
-## bar plot (Figure 2)
+## bar plot (Figure S1)
+
+cifreqplot <- ggplot(cifreq, aes(x = fct_relevel(yearPub, c("2022", "2019")),
+                                 y = pct,
+                                 fill = fct_relevel(commInvPresence, c("Yes", "No")),
+                                 pattern = fct_relevel(commInvPresence, c("Yes", "No")),
+                                 label = scales::percent(pct))) +
+  geom_col_pattern(width = 0.5,
+                   position = "dodge",
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.05,
+                   pattern_key_scale_factor = 0.6) +
+  scale_pattern_manual(values = c("Yes" = "stripe", "No" = "none")) +
+  scale_fill_manual(values = comminvPalette,
+                    limits = c("No", "Yes")) +
+  labs(x = "Year",
+       y = "Percentages of articles",
+       fill = "Community involvement") +
+  scale_y_continuous(labels = scales::percent) +
+  theme(text = element_text(size = 16),
+        legend.position = "bottom") +
+  guides(fill = guide_legend(override.aes = 
+                                  list(
+                                    pattern = c("none", "stripe"))),
+         pattern = "none") +
+  coord_flip()
+
+cifreqplot
+
+# export file (Figure 2)
+ggsave(filename = "graphs/figs1_freq.png",
+       plot = cifreqplot,
+       scale = 1.5,
+       width = 12,
+       height = 8,
+       units = "cm",
+       dpi = 300)
+
+## bar plot (INSAR poster)
 
 cifreqplot <- ggplot(cifreq, aes(x = fct_relevel(yearPub, c("2022", "2019")), 
                                  y = pct, 
@@ -67,24 +108,15 @@ cifreqplot <- ggplot(cifreq, aes(x = fct_relevel(yearPub, c("2022", "2019")),
   geom_col(position = "dodge") +
   labs(x = "Year",
        y = "Percentages of articles",
-       fill = "Community involvement") +
+       fill = "Community\ninvolvement") +
   scale_fill_manual(values = comminvPalette,
                     limits = c("No", "Yes")) +
   scale_y_continuous(labels = scales::percent) +
-  theme(text = element_text(size = 12),
-        legend.position = "bottom") +
+  theme(text = element_text(size = 18),
+        legend.position = "right") +
   coord_flip()
 
 cifreqplot
-
-# export file (Figure 2)
-ggsave(filename = "graphs/fig2_freq.png",
-       plot = cifreqplot,
-       scale = 1.5,
-       width = 12,
-       height = 8,
-       units = "cm",
-       dpi = 300)
 
 # export file (INSAR Fig 1)
 ggsave(filename = "graphs/insar-fig1.png",
@@ -158,7 +190,7 @@ cmdetailedtable <- cmdetaileddata %>%
   mutate(pct = (noOfArticles/totalByYr))
 
 
-#### Level of participation (Fig 3) ----
+#### Level of participation (Fig 2) ----
 
 # frequency grouped by level of participation and year of publication 
 
@@ -180,30 +212,38 @@ lopnulldata$yearPub <- as.factor(lopnulldata$yearPub)
 lopdata <- lopdata %>%
   bind_rows(., lopnulldata)
 
-## bar plot (Figure 3)
+## bar plot (Figure 2)
 lopdataplot <- ggplot(lopdata, aes(x = fct_relevel(levelOfPart, c("Insufficient information", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")), 
                                    y = pct, 
-                                   fill = reorder(yearPub, -pct),
+                                   fill = fct_relevel(yearPub, c("2022", "2019")),
+                                   pattern = fct_relevel(yearPub, c("2022", "2019")),
                                    label = scales::percent(pct))) +
-  geom_col(position = "dodge") +
-#  geom_text(position = position_dodge(width = 0.9),
-#            vjust = 0.1,
-#            hjust = -0.1,
-#            size = 3) +
+  geom_col_pattern(width = 0.8,
+                   position = "dodge",
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.05,
+                   pattern_key_scale_factor = 0.6) +
+  scale_pattern_manual(values = c("2019" = "none", "2022" = "stripe")) +
+  scale_fill_manual(values = yrPalette,
+                    limits = c("2019", "2022")) +  
   labs(x = "Level of participation",
        y = "Percentages of articles",
        fill = "Year of publication") +
-  scale_fill_manual(values = yrPalette,
-                    limits = c("2019", "2022")) +
   scale_y_continuous(labels = scales::percent) +
-  theme(text = element_text(size = 12),
+  theme(text = element_text(size = 16),
         legend.position = "bottom") +
+  guides(fill = guide_legend(override.aes = 
+                               list(
+                                 pattern = c("none", "stripe"))),
+         pattern = "none") +
   coord_flip()
 
 lopdataplot
 
 # export file
-ggsave(filename = "graphs/fig3_levelofpart.png",
+ggsave(filename = "graphs/fig2_levelofpart.png",
        plot = lopdataplot,
        scale = 1.5,
        width = 14,
@@ -211,12 +251,35 @@ ggsave(filename = "graphs/fig3_levelofpart.png",
        units = "cm",
        dpi = 300)
 
+
+## bar plot (INSAR poster)
+lopdataplot <- ggplot(lopdata, aes(x = fct_relevel(levelOfPart, c("Insufficient information", "Informing", "Consulting", "Engaging", "Co-producing", "Community led", "Community controlled")), 
+                                   y = pct, 
+                                   fill = reorder(yearPub, -pct),
+                                   label = scales::percent(pct))) +
+  geom_col(position = "dodge") +
+  #  geom_text(position = position_dodge(width = 0.9),
+  #            vjust = 0.1,
+  #            hjust = -0.1,
+  #            size = 3) +
+  labs(x = "Level of\nparticipation",
+       y = "Percentages of articles",
+       fill = "Year of\npublication") +
+  scale_fill_manual(values = yrPalette,
+                    limits = c("2019", "2022")) +
+  scale_y_continuous(labels = scales::percent) +
+  theme(text = element_text(size = 18),
+        legend.position = "right") +
+  coord_flip()
+
+lopdataplot
+
 # export file (INSAR fig)
 ggsave(filename = "graphs/insar_levelofpart.png",
        plot = lopdataplot,
        scale = 0.5,
        width = 39.87,
-       height = 14.56,
+       height = 16.68,
        units = "cm",
        dpi = 500)
 
@@ -281,7 +344,7 @@ boidetailedtable <- boidetaileddata %>%
   mutate(pct = (noOfArticles/totalByYr))
   
 
-### community members (broad) X level of participation (Table S8 & Fig 4) ----
+### community members (broad) X level of participation (Table S8 & Fig 3) ----
 
 ## create crosstable to calculate number and percentage of articles for each group of community members broken down by level of participation and year of publication (Table S8)
 
@@ -314,26 +377,38 @@ cmXlopnulldata$yearPub <- as.factor(cmXlopnulldata$yearPub)
 cmXloptable <- cmXloptable %>%
   bind_rows(., cmXlopnulldata)
 
-cmXloppanel <- ggplot(cmXloptable, aes(fill = reorder(yearPub, -pct), 
-                               y = pct, 
-                               x = fct_relevel(commMem,c("Administration", "Professionals", "Families of Autistic People", "Autistic People")),
-                               label = scales::percent(pct))) +
-  geom_col(position = "dodge") +
+cmXloppanel <- ggplot(cmXloptable, aes(fill = reorder(yearPub, -pct),
+                                       pattern = reorder(yearPub, -pct),
+                                       y = pct,
+                                       x = fct_relevel(commMem,c("Administration", "Professionals", "Families of Autistic People", "Autistic People")),
+                                       label = scales::percent(pct))) +
+  geom_col_pattern(width = 0.8,
+                   position = "dodge",
+                   pattern_fill = "black",
+                   pattern_angle = 45,
+                   pattern_density = 0.1,
+                   pattern_spacing = 0.05,
+                   pattern_key_scale_factor = 0.6) +
+  scale_pattern_manual(values = c("2019" = "none", "2022" = "stripe")) +
+  scale_fill_manual(values = yrPalette,
+                    limits = c("2019", "2022")) +
+  scale_y_continuous(labels = scales::percent) +
   theme(legend.position = "bottom", 
         text = element_text(size = 16)) +
   labs(x = "Community members",
        y = "Percentage of articles",
        fill = "Year of publication") +
-  scale_fill_manual(values = yrPalette,
-                    limits = c("2019", "2022")) +
-  scale_y_continuous(labels = scales::percent) +
+  guides(fill = guide_legend(override.aes = 
+                               list(
+                                 pattern = c("none", "stripe"))),
+         pattern = "none") +
   coord_flip() +
   facet_wrap(~ levelOfPart, ncol = 3)
 
 cmXloppanel
 
 # export file
-ggsave(filename = "graphs/fig4_cmXloppanel.png",
+ggsave(filename = "graphs/fig3_cmXloppanel.png",
        plot = cmXloppanel,
        scale = 2,
        width = 15,
@@ -341,7 +416,7 @@ ggsave(filename = "graphs/fig4_cmXloppanel.png",
        units = "cm",
        dpi = 300)
 
-### frequency of community involvement by country (Table S9 & Figure 5) ----
+### frequency of community involvement by country (Table S9 & Figure 4) ----
 
 # create a crosstable to look at country distribution overall (regardless of community involvement)
 allcountrydata <- fulldata %>%
